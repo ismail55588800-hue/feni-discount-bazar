@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feni Bazar - Notification Test</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px 20px; background: #f8fafc; }
+        button { background: #4F46E5; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; margin-top: 20px; font-weight: bold;}
+        #tokenBox { margin-top: 20px; padding: 15px; background: #e2e8f0; border-radius: 8px; word-break: break-all; font-size: 12px; text-align: left;}
+    </style>
+</head>
+<body>
+    <h2>Feni Discount Bazar</h2>
+    <p>নিচের বাটনে ক্লিক করে নোটিফিকেশন পারমিশন দিন।</p>
+    <button onclick="requestPermission()">নোটিফিকেশন অন করুন</button>
+    <div id="tokenBox">টোকেন এখানে আসবে...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBhusc80KBg7N2xNvxxvT-YCLmb22h8tcM",
+            authDomain: "feni-discount-bazar-e12de.firebaseapp.com",
+            projectId: "feni-discount-bazar-e12de",
+            storageBucket: "feni-discount-bazar-e12de.firebasestorage.app",
+            messagingSenderId: "492747097112",
+            appId: "1:492747097112:web:cb5ee580283b340f5b6f6d"
+        };
+
+        // 🔴 এখানে আপনার VAPID Key বসান
+        const VAPID_KEY = "BGnBjbZRvixRzHSUkTIEnN8vEDQrV4nXKIrHq_pOslRS0NpB0kE3KtcVlH-Nw8DUojQ8whTH1eQvsl4deBsnCW0";
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        window.requestPermission = async () => {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+                    if (token) {
+                        document.getElementById('tokenBox').innerText = "আপনার ডিভাইস টোকেন:\n" + token;
+                    } else {
+                        document.getElementById('tokenBox').innerText = "টোকেন পাওয়া যায়নি।";
+                    }
+                } else {
+                    alert('আপনি নোটিফিকেশন পারমিশন দেননি।');
+                }
+            } catch (error) {
+                document.getElementById('tokenBox').innerText = "এরর: " + error.message;
+            }
+        };
+
+        onMessage(messaging, (payload) => {
+            alert("নতুন নোটিফিকেশন: " + payload.notification.title);
+        });
+    </script>
+</body>
+</html>
